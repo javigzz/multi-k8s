@@ -1,9 +1,25 @@
 sudo: required
 services:
   - docker
+env:
+  global:
+    - GIT_SHA=$(git rev-parse HEAD)
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1 # makes sure that the google could commands don't stop with any prompts
 before_install:
   - openssl aes-256-cbc -K $encrypted_0c35eebf403c_key -iv $encrypted_0c35eebf403c_iv -in service-account.json.enc -out service-account.json -d
   - curl https://sdk.cloud.google.com | bash > /dev/null; # installing the google sdk
   - source $HOME/google-cloud-sdk/path.bash.inc
-  - gcloud components update kubectl
+  - gcloud components update kubectl # this is configuring the remote cluster accessible from local (travis) machine with kubectl
   - gcloud auth activate-service-account --key-file service-account.json
+  - gcloud config set project udemy-multi-k8s-244122 # check the name of the project
+  - gcloud config set compute/zone europe-north1-a # check the zone
+  - gcloud container clusters get-credentials cluster-1 # check the name of the cluster
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker build -t javigzz/udemy-multi-k8s-test -f ./client/Dockerfile.dev ./client # .dev to run the tests (dev build)
+
+script:
+  - docker run javigzz/udemy-multi-k8s-test npm test -- --coverage # the "-- --coverage" is there since otherwise npm enters in watch mode and never finishes
+
+deploy:
+  provider: script
+  script: bash ./deploy.sh # add hoc script to build images, push to repo and and deploy
