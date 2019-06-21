@@ -7,10 +7,10 @@ spec:
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
-  commonName: k8s-multi.com # what the certificate is good for
+  commonName: test.paleobiogeography.org # what the certificate is good for
   dnsNames: # all the different domains that must be associated with the cert
-    - k8s-multi.com
-    - www.k8s-multi.com
+    - test.paleobiogeography.org
+    - www.test.paleobiogeography.org
   acme:
     config:
       - http01:

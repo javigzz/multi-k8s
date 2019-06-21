@@ -5,9 +5,28 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/rewrite-target: /$1 # how the actual copy of nginx behaves
+    certmanager.k8s.io/cluster-issuer: 'letsencrypt-prod' # issuer used by ingress
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true' # redirects to https in case of access to http
 spec:
+  tls: # domains where where https will be enabled
+    - hosts:
+        - test.paleobiogeography.org
+        - www.test.paleobiogeography.org
+      secretName: k8s-multi-com
   rules:
-    - http:
+    - host: test.paleobiogeography.org
+      http:
+        paths:
+          - path: /?(.*)
+            backend:
+              serviceName: client-cluster-ip-service
+              servicePort: 3000
+          - path: /api/?(.*)
+            backend:
+              serviceName: server-cluster-ip-service
+              servicePort: 5000
+    - host: www.test.paleobiogeography.org # same se of rules for www.
+      http:
         paths:
           - path: /?(.*)
             backend:
