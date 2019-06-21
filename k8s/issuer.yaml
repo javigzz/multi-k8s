@@ -1,0 +1,11 @@
+apiVersion: certmanager.k8s.io/v1alpha1 # this is not an standard kubernetes object
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencript.org/directory
+    email: 'javier.gon@protonmail.com'
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    http01: {} # says that we want to use the http way of getting the certificate
